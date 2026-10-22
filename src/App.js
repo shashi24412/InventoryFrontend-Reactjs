@@ -1,24 +1,37 @@
-import logo from './logo.svg';
-import './App.css';
+// import './App.css';
+import Sinin from './Sinin';
+import { Route, Routes } from 'react-router-dom';
+import ItemMaster from './InventoryMaster/ItemMaster';
+import DepartmentIndent from './InventoryTransaction/DepartmentIndent';
+import Store from './InventoryMaster/Store';
+import DepartmentApproval from './InventoryTransaction/DepartmentApproval';
+import PrivateRoute from './PrivateRoute';
+import Dashboard from './Dashboard';
+import UnauthorizedCompent from './UnauthorizedCompent';
+import { Javascript_Dashboard } from './JavascriptCode/Javascript_Dashboard';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+
+    <Routes>
+
+      <Route element={<PrivateRoute />}>
+        <Route path="/ItemMaster" element={<ItemMaster />} />
+        <Route path="/DepartmentIndent" element={<DepartmentIndent />} />
+        <Route path="/Store" element={<Store />} />
+        <Route path='/DepartmentApproval' element={<DepartmentApproval />} />
+        <Route path='/Dashboard' element={<Dashboard />} />
+      </Route>
+
+
+
+      <Route path="/" element={<Sinin />} />
+      <Route path="/Unauthorized" element={<UnauthorizedCompent />} />
+      <Route path="*" element={<div><h1>No Page found</h1></div>} />
+      <Route path="/JSDashboard" element={<Javascript_Dashboard />} />
+
+    </Routes>
+
   );
 }
 

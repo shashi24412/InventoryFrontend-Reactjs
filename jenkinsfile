@@ -23,22 +23,48 @@ pipeline {
             }
         }
 
+        // stage('Deploy to EC2') {
+        //     steps {
+        //         echo "Deploying to ${APP_DIR}..."
+        //         sh """
+        //             sudo mkdir -p ${APP_DIR}
+        //             sudo chown -R jenkins:jenkins ${APP_DIR}
+
+        //             sudo rsync -av --delete --exclude='.git' --exclude='node_modules' . ${APP_DIR}/
+
+        //             cd ${APP_DIR}
+        //             npm install
+        //             npm run build
+        //             sudo fuser -k ${PORT}/tcp || true
+        //         """
+        //     }
+        // }
         stage('Deploy to EC2') {
-            steps {
-                echo "Deploying to ${APP_DIR}..."
-                sh """
-                    sudo mkdir -p ${APP_DIR}
-                    sudo chown -R jenkins:jenkins ${APP_DIR}
+    steps {
+        echo "Deploying to ${APP_DIR}..."
+        sh """
+            sudo mkdir -p ${APP_DIR}
+            sudo chown -R jenkins:jenkins ${APP_DIR}
 
-                    sudo rsync -av --delete --exclude='.git' --exclude='node_modules' . ${APP_DIR}/
+            sudo rsync -av --delete --exclude='.git' --exclude='node_modules' . ${APP_DIR}/
 
-                    cd ${APP_DIR}
-                    npm install
-                    npm run build
-                    sudo fuser -k ${PORT}/tcp || true
-                """
-            }
-        }
+            cd ${APP_DIR}
+            npm install
+            npm run build
+
+            # Stop the existing PM2 app if it's already running
+            pm2 stop frontend-app || true
+            pm2 delete frontend-app || true
+
+            # Kill anything lingering on port 3000
+            sudo fuser -k ${PORT}/tcp || true
+
+            # Start serving the production build using PM2
+            # Note: If your webpack outputs to 'dist' instead of 'build', replace 'build' with 'dist'
+            JENKINS_NODE_COOKIE=dontKillMe pm2 start "npx serve -s build -l ${PORT}" --name "frontend-app"
+        """
+    }
+}
     }
 
     post {

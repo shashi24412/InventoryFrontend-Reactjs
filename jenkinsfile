@@ -1,0 +1,31 @@
+node{
+    def appDir='var/www/frontend'
+    stage('clean workspace'){
+        echo "Cleaning workspace at ${appDir}"
+        deleteDir()
+    }
+    stage('clone repository'){
+        echo "Cloning repository into ${appDir}"
+        git(
+            branch: 'DevelopmentBranch',
+            url: 'https://github.com/shashi24412/InventoryFrontend-Reactjs'
+        )
+    }
+    stage('deploy to EC2'){
+        echo "Deploying to EC2 instance"
+        sh """
+        sudo mkdir -p ${appDir}
+        sudo chown -R jenkins:jenkins ${appDir}
+
+        sudo rsync -av --delete
+        --exclude='.git'
+        --exclude='node_modules' .
+        / ${appDir}
+
+        cd ${appDir}
+        sudo npm install
+        sudo npm run build
+        sudo fuser -k 3000/tcp || true
+        """
+    }
+}

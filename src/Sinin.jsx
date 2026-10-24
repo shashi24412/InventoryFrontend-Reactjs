@@ -59,7 +59,7 @@ function Sinin() {
                     onChange={(e) => setPassword(e.target.value)}
                     style={styles.input}
                 />
-                <button type="submit" style={styles.button}>Login</button>
+                <button type="submit" style={styles.button}>Login/Sinin</button>
             </form>
         </div>
     );

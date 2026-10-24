@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    options {
+        skipDefaultCheckout(true)
+    }
+
     environment {
         APP_DIR = '/var/www/frontend'
         PORT    = '3000'
@@ -9,9 +13,6 @@ pipeline {
     stages {
         stage('Clean Workspace') {
             steps {
-                echo "Cleaning up workspace..."
-                // Fix: Force removal of any leftover root-owned 'var' or build dirs from previous builds
-                sh 'sudo rm -rf ./var node_modules build dist || true'
                 cleanWs()
             }
         }
@@ -26,24 +27,15 @@ pipeline {
             steps {
                 echo "Deploying to ${APP_DIR}..."
                 sh """
-                    # 1. Create target folder with absolute path and assign ownership to jenkins
                     sudo mkdir -p ${APP_DIR}
                     sudo chown -R jenkins:jenkins ${APP_DIR}
 
-                    # 2. Sync project files (single line to avoid rsync usage/syntax errors)
                     sudo rsync -av --delete --exclude='.git' --exclude='node_modules' . ${APP_DIR}/
 
-                    # 3. Build application in the deployment directory
                     cd ${APP_DIR}
                     npm install
                     npm run build
-
-                    # 4. Stop existing process on the specified port if active
                     sudo fuser -k ${PORT}/tcp || true
-
-                    # 5. Start the frontend application in background (using serve or npm start)
-                    # Uncomment and adjust the runner you use:
-                    # nohup npx serve -s build -l ${PORT} > app.log 2>&1 &
                 """
             }
         }

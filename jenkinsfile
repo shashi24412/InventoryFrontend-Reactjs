@@ -11,21 +11,35 @@ node{
             url: 'https://github.com/shashi24412/InventoryFrontend-Reactjs'
         )
     }
-    stage('deploy to EC2'){
-        echo "Deploying to EC2 instance"
-        sh """
-        sudo mkdir -p ${appDir}
-        sudo chown -R jenkins:jenkins ${appDir}
+    // stage('deploy to EC2'){
+    //     echo "Deploying to EC2 instance"
+    //     sh """
+    //     sudo mkdir -p ${appDir}
+    //     sudo chown -R jenkins:jenkins ${appDir}
 
-        sudo rsync -av --delete
-        --exclude='.git'
-        --exclude='node_modules' .
-        / ${appDir}
+    //     sudo rsync -av --delete
+    //     --exclude='.git'
+    //     --exclude='node_modules' .
+    //     / ${appDir}
 
-        cd ${appDir}
-        sudo npm install
-        sudo npm run build
-        sudo fuser -k 3000/tcp || true
-        """
-    }
+    //     cd ${appDir}
+    //     sudo npm install  
+    //     sudo npm run build
+    //     sudo fuser -k 3000/tcp || true
+    //     """
+    // }
+    stage('deploy to EC2') {
+    echo "Deploying to EC2 instance"
+    sh """
+    sudo mkdir -p ${appDir}
+    sudo chown -R jenkins:jenkins ${appDir}
+
+    sudo rsync -av --delete --exclude='.git' --exclude='node_modules' . ${appDir}
+
+    cd ${appDir}
+    sudo npm install
+    sudo npm run build
+    sudo fuser -k 3000/tcp || true
+    """
+}
 }
